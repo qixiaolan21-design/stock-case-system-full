@@ -141,11 +141,11 @@
                 <h2 class="text-2xl font-bold text-gray-800 mb-6">文档上传 - 自动提取股票信息</h2>
                 
                 <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
-                    <div id="drop-zone" class="drop-zone rounded-lg p-12 text-center cursor-pointer">
-                        <i class="fas fa-cloud-upload-alt text-5xl text-gray-400 mb-4"></i>
-                        <p class="text-lg text-gray-600 mb-2">拖拽文档到此处，或点击上传</p>
-                        <p class="text-sm text-gray-400">支持 Word (.docx)、PDF (.pdf)、文本 (.txt)</p>
-                        <input type="file" id="file-input" class="hidden" accept=".docx,.pdf,.txt">
+                    <div id="drop-zone" class="drop-zone rounded-lg p-12 text-center cursor-pointer" onclick="document.getElementById('file-input').click()">
+                        <i class="fas fa-cloud-upload-alt text-5xl text-gray-400 mb-4" id="upload-icon"></i>
+                        <p class="text-lg text-gray-600 mb-2" id="upload-text">拖拽文档到此处，或点击上传</p>
+                        <p class="text-sm text-gray-400">支持 Word (.docx)、PDF (.pdf)、PPT (.pptx)、文本 (.txt)</p>
+                        <input type="file" id="file-input" class="hidden" accept=".docx,.pdf,.pptx,.txt" onchange="handleFileSelect(this)">
                     </div>
                 </div>
 

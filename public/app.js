@@ -18,6 +18,13 @@ document.addEventListener('DOMContentLoaded', function() {
     loadTags();
 });
 
+// 文件选择处理
+function handleFileSelect(input) {
+    if (input.files && input.files[0]) {
+        handleFileUpload(input.files[0]);
+    }
+}
+
 // 显示页面
 function showSection(sectionId) {
     document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));

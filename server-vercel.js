@@ -27,7 +27,7 @@ const db = {
 
 // 文件上传配置（内存存储）
 const storage = multer.memoryStorage();
-const upload = multer({ storage: storage, limits: { fileSize: 10 * 1024 * 1024 } });
+const upload = multer({ storage: storage, limits: { fileSize: 50 * 1024 * 1024 } });
 
 const parser = new DocumentParser();
 
@@ -67,7 +67,18 @@ app.post('/api/documents/upload', upload.single('document'), async (req, res) =>
     try {
         if (!req.file) return res.status(400).json({ error: '没有上传文件' });
         
-        const text = req.file.buffer.toString('utf-8');
+        let text = '';
+        const ext = path.extname(req.file.originalname).toLowerCase();
+        
+        // 处理不同格式
+        if (ext === '.pptx' || ext === '.ppt') {
+            // PPT文件：尝试提取文本（简化处理）
+            text = extractTextFromPPT(req.file.buffer);
+        } else {
+            // 其他文件：直接转为文本
+            text = req.file.buffer.toString('utf-8');
+        }
+        
         const parseResult = parser.extractStockInfo(text);
         
         db.documents.push({
@@ -88,9 +99,37 @@ app.post('/api/documents/upload', upload.single('document'), async (req, res) =>
         
         res.json({ success: true, parsed: parseResult, addedToCases: addedCount });
     } catch (error) {
+        console.error('Upload error:', error);
         res.status(500).json({ error: error.message });
     }
 });
+
+// PPT文本提取（简化版）
+function extractTextFromPPT(buffer) {
+    try {
+        // PPTX是ZIP格式，尝试提取其中的文本
+        let text = '';
+        const str = buffer.toString('utf-8');
+        
+        // 提取所有可读的文本片段
+        const textMatches = str.match(/<a:t>([^<]+)<\/a:t>/g);
+        if (textMatches) {
+            text = textMatches.map(m => m.replace(/<\/?a:t>/g, '')).join(' ');
+        }
+        
+        // 如果上面方法不行，尝试提取所有中文字符和数字
+        if (!text || text.length < 10) {
+            const chineseMatches = str.match(/[\u4e00-\u9fa5]+/g);
+            const numberMatches = str.match(/\d{6}/g); // 股票代码
+            if (chineseMatches) text += chineseMatches.join(' ');
+            if (numberMatches) text += ' ' + numberMatches.join(' ');
+        }
+        
+        return text || buffer.toString('utf-8').replace(/[^\u4e00-\u9fa5\d\s]/g, ' ');
+    } catch (e) {
+        return buffer.toString('utf-8');
+    }
+}
 
 app.get('/api/documents', (req, res) => {
     res.json({ documents: db.documents });
