@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>股票教学案例管理系统 - 完整版</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        .section { display: none; }
+        .section.active { display: block; }
+        .drop-zone {
+            border: 2px dashed #ccc;
+            transition: all 0.3s;
+        }
+        .drop-zone.dragover {
+            border-color: #3b82f6;
+            background: #eff6ff;
+        }
+    </style>
+</head>
+<body class="bg-gray-50">
+    <nav class="bg-gradient-to-r from-blue-600 to-purple-600 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center space-x-3">
+                    <i class="fas fa-chart-line text-2xl"></i>
+                    <span class="text-xl font-bold">股票教学案例管理系统</span>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="flex">
+        <aside class="w-64 bg-white shadow-md min-h-screen">
+            <nav class="p-4 space-y-2">
+                <a href="#" onclick="showSection('dashboard')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg bg-blue-50 text-blue-600" data-section="dashboard">
+                    <i class="fas fa-tachometer-alt w-5"></i><span>仪表盘</span>
+                </a>
+                <a href="#" onclick="showSection('upload')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50" data-section="upload">
+                    <i class="fas fa-upload w-5"></i><span>文档上传</span>
+                </a>
+                <a href="#" onclick="showSection('cases')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50" data-section="cases">
+                    <i class="fas fa-file-alt w-5"></i><span>案例记录</span>
+                </a>
+                <a href="#" onclick="showSection('evidence')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50" data-section="evidence">
+                    <i class="fas fa-images w-5"></i><span>印证案例库</span>
+                </a>
+                <a href="#" onclick="showSection('feedback')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50" data-section="feedback">
+                    <i class="fas fa-comments w-5"></i><span>学员反馈</span>
+                </a>
+                <a href="#" onclick="showSection('search')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50" data-section="search">
+                    <i class="fas fa-search w-5"></i><span>搜索</span>
+                </a>
+                <a href="#" onclick="showSection('chart')" class="nav-item flex items-center space-x-3 px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-50" data-section="chart">
+                    <i class="fas fa-chart-area w-5"></i><span>图表展示</span>
+                </a>
+            </nav>
+        </aside>
+
+        <main class="flex-1 p-6">
+            <!-- 仪表盘 -->
+            <div id="dashboard" class="section active">
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">教学案例</p>
+                                <p class="text-3xl font-bold text-blue-600 mt-1" id="stat-cases">0</p>
+                            </div>
+                            <div class="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-file-alt text-blue-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">印证案例</p>
+                                <p class="text-3xl font-bold text-purple-600 mt-1" id="stat-evidence">0</p>
+                            </div>
+                            <div class="w-12 h-12 bg-purple-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-images text-purple-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">学员反馈</p>
+                                <p class="text-3xl font-bold text-green-600 mt-1" id="stat-feedback">0</p>
+                            </div>
+                            <div class="w-12 h-12 bg-green-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-comments text-green-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-sm p-6">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-gray-500 text-sm">已上传文档</p>
+                                <p class="text-3xl font-bold text-orange-600 mt-1" id="stat-docs">0</p>
+                            </div>
+                            <div class="w-12 h-12 bg-orange-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-file-upload text-orange-600 text-xl"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="text-lg font-semibold mb-4">快速操作</h3>
+                    <div class="grid grid-cols-2 md:grid-cols-5 gap-4">
+                        <button onclick="showSection('upload')" class="flex items-center p-4 bg-orange-50 rounded-lg hover:bg-orange-100 text-left">
+                            <i class="fas fa-upload text-orange-600 mr-3 text-xl"></i>
+                            <div><p class="font-medium text-orange-900">上传文档</p><p class="text-sm text-orange-600">自动提取股票</p></div>
+                        </button>
+                        <button onclick="showSection('cases')" class="flex items-center p-4 bg-blue-50 rounded-lg hover:bg-blue-100 text-left">
+                            <i class="fas fa-file-alt text-blue-600 mr-3 text-xl"></i>
+                            <div><p class="font-medium text-blue-900">案例记录</p><p class="text-sm text-blue-600">查看所有案例</p></div>
+                        </button>
+                        <button onclick="showSection('evidence')" class="flex items-center p-4 bg-purple-50 rounded-lg hover:bg-purple-100 text-left">
+                            <i class="fas fa-images text-purple-600 mr-3 text-xl"></i>
+                            <div><p class="font-medium text-purple-900">印证案例</p><p class="text-sm text-purple-600">PPT案例库</p></div>
+                        </button>
+                        <button onclick="showSection('search')" class="flex items-center p-4 bg-green-50 rounded-lg hover:bg-green-100 text-left">
+                            <i class="fas fa-search text-green-600 mr-3 text-xl"></i>
+                            <div><p class="font-medium text-green-900">搜索</p><p class="text-sm text-green-600">按标签查找</p></div>
+                        </button>
+                        <button onclick="showSection('chart')" class="flex items-center p-4 bg-indigo-50 rounded-lg hover:bg-indigo-100 text-left">
+                            <i class="fas fa-chart-area text-indigo-600 mr-3 text-xl"></i>
+                            <div><p class="font-medium text-indigo-900">图表</p><p class="text-sm text-indigo-600">纳指走势</p></div>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 文档上传 -->
+            <div id="upload" class="section">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">文档上传 - 自动提取股票信息</h2>
+                
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                    <div id="drop-zone" class="drop-zone rounded-lg p-12 text-center cursor-pointer">
+                        <i class="fas fa-cloud-upload-alt text-5xl text-gray-400 mb-4"></i>
+                        <p class="text-lg text-gray-600 mb-2">拖拽文档到此处，或点击上传</p>
+                        <p class="text-sm text-gray-400">支持 Word (.docx)、PDF (.pdf)、文本 (.txt)</p>
+                        <input type="file" id="file-input" class="hidden" accept=".docx,.pdf,.txt">
+                    </div>
+                </div>
+
+                <div id="upload-result" class="hidden bg-white rounded-xl shadow-sm p-6 mb-6">
+                    <h3 class="text-lg font-semibold mb-4">解析结果</h3>
+                    <div id="parse-summary" class="mb-4"></div>
+                    <div id="parsed-stocks" class="space-y-3"></div>
+                </div>
+
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="text-lg font-semibold mb-4">已上传文档</h3>
+                    <div id="documents-list" class="space-y-2"></div>
+                </div>
+            </div>
+
+            <!-- 案例记录 -->
+            <div id="cases" class="section">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">案例记录</h2>
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                    <h3 class="text-lg font-semibold mb-4">手动添加案例</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <input type="date" id="case-date" class="border rounded-lg px-3 py-2">
+                        <input type="text" id="case-code" placeholder="股票代码" class="border rounded-lg px-3 py-2">
+                        <input type="text" id="case-name" placeholder="股票名称" class="border rounded-lg px-3 py-2">
+                        <button onclick="addCase()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">添加</button>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4">
+                        <input type="text" id="case-pressure" placeholder="压力位（逗号分隔）" class="border rounded-lg px-3 py-2">
+                        <input type="text" id="case-support" placeholder="支撑位（逗号分隔）" class="border rounded-lg px-3 py-2">
+                    </div>
+                    <textarea id="case-risk" rows="2" placeholder="风险点" class="w-full border rounded-lg px-3 py-2 mt-4"></textarea>
+                    <textarea id="case-opportunity" rows="2" placeholder="机会点" class="w-full border rounded-lg px-3 py-2 mt-2"></textarea>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="text-lg font-semibold mb-4">案例列表</h3>
+                    <div id="cases-list" class="space-y-3"></div>
+                </div>
+            </div>
+
+            <!-- 印证案例库 -->
+            <div id="evidence" class="section">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">印证案例库</h2>
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                    <h3 class="text-lg font-semibold mb-4">添加印证案例</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <input type="date" id="evidence-date" class="border rounded-lg px-3 py-2">
+                        <input type="text" id="evidence-code" placeholder="股票代码" class="border rounded-lg px-3 py-2">
+                        <input type="text" id="evidence-name" placeholder="股票名称" class="border rounded-lg px-3 py-2">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mt-4">
+                        <select id="evidence-type" class="border rounded-lg px-3 py-2">
+                            <option value="">选择印证类型</option>
+                            <option value="筹码">筹码</option>
+                            <option value="机构DC">机构DC</option>
+                            <option value="密码">密码</option>
+                            <option value="趋势">趋势</option>
+                            <option value="量能">量能</option>
+                            <option value="K线">K线</option>
+                            <option value="支撑压力">支撑压力</option>
+                            <option value="均线">均线</option>
+                        </select>
+                        <input type="text" id="evidence-tags" placeholder="标签（逗号分隔）" class="border rounded-lg px-3 py-2">
+                        <input type="number" id="evidence-page" placeholder="PPT页码" class="border rounded-lg px-3 py-2">
+                    </div>
+                    <textarea id="evidence-desc" rows="2" placeholder="案例描述" class="w-full border rounded-lg px-3 py-2 mt-4"></textarea>
+                    <button onclick="addEvidence()" class="mt-4 bg-purple-600 text-white px-6 py-2 rounded-lg hover:bg-purple-700">保存案例</button>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="text-lg font-semibold mb-4">案例列表</h3>
+                    <div id="evidence-list" class="space-y-3"></div>
+                </div>
+            </div>
+
+            <!-- 学员反馈 -->
+            <div id="feedback" class="section">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">学员反馈</h2>
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                    <h3 class="text-lg font-semibold mb-4">添加反馈</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+                        <input type="date" id="feedback-date" class="border rounded-lg px-3 py-2">
+                        <input type="text" id="feedback-student" placeholder="学员名称" class="border rounded-lg px-3 py-2">
+                        <input type="text" id="feedback-stock" placeholder="股票代码" class="border rounded-lg px-3 py-2">
+                        <input type="number" id="feedback-profit" placeholder="获利金额" class="border rounded-lg px-3 py-2">
+                    </div>
+                    <div class="mt-4">
+                        <label class="block text-gray-600 mb-2">方法标签:</label>
+                        <div class="flex flex-wrap gap-2">
+                            <label class="flex items-center space-x-2 bg-gray-100 px-3 py-2 rounded-lg cursor-pointer">
+                                <input type="checkbox" class="method-tag" value="0家K线"><span>0家K线</span>
+                            </label>
+                            <label class="flex items-center space-x-2 bg-gray-100 px-3 py-2 rounded-lg cursor-pointer">
+                                <input type="checkbox" class="method-tag" value="筹码"><span>筹码</span>
+                            </label>
+                            <label class="flex items-center space-x-2 bg-gray-100 px-3 py-2 rounded-lg cursor-pointer">
+                                <input type="checkbox" class="method-tag" value="飘带"><span>飘带</span>
+                            </label>
+                            <label class="flex items-center space-x-2 bg-gray-100 px-3 py-2 rounded-lg cursor-pointer">
+                                <input type="checkbox" class="method-tag" value="机构DC"><span>机构DC</span>
+                            </label>
+                        </div>
+                    </div>
+                    <textarea id="feedback-desc" rows="2" placeholder="反馈描述" class="w-full border rounded-lg px-3 py-2 mt-4"></textarea>
+                    <button onclick="addFeedback()" class="mt-4 bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">保存反馈</button>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="text-lg font-semibold mb-4">反馈列表</h3>
+                    <div id="feedback-list" class="space-y-3"></div>
+                </div>
+            </div>
+
+            <!-- 搜索 -->
+            <div id="search" class="section">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">案例搜索</h2>
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                    <div class="flex gap-4">
+                        <input type="text" id="search-input" placeholder="输入关键词搜索..." class="flex-1 border rounded-lg px-4 py-3">
+                        <input type="text" id="search-stock" placeholder="股票代码" class="border rounded-lg px-4 py-3 w-40">
+                        <button onclick="performSearch()" class="bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700">搜索</button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-6 mb-6">
+                    <h3 class="text-lg font-semibold mb-4">热门标签</h3>
+                    <div id="tag-cloud" class="flex flex-wrap gap-2">
+                        <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full cursor-pointer hover:bg-blue-200" onclick="searchByTag('筹码')">筹码</span>
+                        <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full cursor-pointer hover:bg-purple-200" onclick="searchByTag('机构DC')">机构DC</span>
+                        <span class="px-3 py-1 bg-orange-100 text-orange-700 rounded-full cursor-pointer hover:bg-orange-200" onclick="searchByTag('密码')">密码</span>
+                        <span class="px-3 py-1 bg-green-100 text-green-700 rounded-full cursor-pointer hover:bg-green-200" onclick="searchByTag('趋势')">趋势</span>
+                        <span class="px-3 py-1 bg-pink-100 text-pink-700 rounded-full cursor-pointer hover:bg-pink-200" onclick="searchByTag('量能')">量能</span>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <h3 class="text-lg font-semibold mb-4">搜索结果</h3>
+                    <div id="search-results" class="space-y-3"></div>
+                </div>
+            </div>
+
+            <!-- 图表展示 -->
+            <div id="chart" class="section">
+                <h2 class="text-2xl font-bold text-gray-800 mb-6">图表展示</h2>
+                <div class="bg-white rounded-xl shadow-sm p-4 mb-6">
+                    <div class="flex gap-4">
+                        <button onclick="loadChart()" class="bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700">
+                            <i class="fas fa-sync-alt mr-2"></i>刷新图表
+                        </button>
+                        <button onclick="generateDemoData()" class="bg-green-600 text-white px-4 py-2 rounded-lg hover:bg-green-700">
+                            <i class="fas fa-database mr-2"></i>生成演示数据
+                        </button>
+                    </div>
+                </div>
+                <div class="bg-white rounded-xl shadow-sm p-6">
+                    <div id="chart-container" style="width: 100%; height: 500px;"></div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <script src="app.js"></script>
+</body>
+</html>
