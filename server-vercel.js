@@ -7,7 +7,7 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const multer = require('multer');
-const DocumentParser = require('./documentParser');
+const DocumentParser = require('./documentParser-simple');
 
 const app = express();
 
